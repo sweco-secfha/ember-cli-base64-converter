@@ -1,6 +1,6 @@
 import Base64converter from '../services/base-64-converter';
 
-export function initialize(container) {
+export function initialize(container, application) {
   var registerKey = 'service:base64converter';
   var registerName = 'base64converter';
   var inject = container.injection.bind(container);
