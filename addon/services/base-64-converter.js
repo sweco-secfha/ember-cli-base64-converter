@@ -11,35 +11,40 @@ export default Ember.Service.extend({
    * @return {[type]}              [description]
    */
   convert(imageUrl, outputFormat) {
+    var promise = null;
     var cache = this.get('cache');
     var cacheValue = cache[imageUrl];
 
-    if (cacheValue) {return cacheValue;}
-
-    var promise = new Ember.RSVP.Promise(function(resolve, reject) {
-      var img = new Image();
-      img.setAttribute('crossOrigin', 'anonymous');
-      img.src = imageUrl;
-
-      img.onload = function() {
-        var canvas = document.createElement('CANVAS');
-        var ctx = canvas.getContext('2d');
-
-        canvas.height = this.height;
-        canvas.width = this.width;
-
-        ctx.drawImage(this, 0, 0);
-
-        var dataURL = canvas.toDataURL(outputFormat);
-
-        cache[imageUrl] = dataURL;
-        canvas = null;
-
-        resolve(dataURL);
-      };
-
-      img.onerror = reject;
-    });
+    if (cacheValue) {
+      var promise = new Ember.RSVP.Promise(function(resolve, reject) {
+        resolve(cacheValue);
+      });
+    } else {
+      var promise = new Ember.RSVP.Promise(function(resolve, reject) {
+        var img = new Image();
+        img.setAttribute('crossOrigin', 'anonymous');
+        img.src = imageUrl;
+  
+        img.onload = function() {
+          var canvas = document.createElement('CANVAS');
+          var ctx = canvas.getContext('2d');
+  
+          canvas.height = this.height;
+          canvas.width = this.width;
+  
+          ctx.drawImage(this, 0, 0);
+  
+          var dataURL = canvas.toDataURL(outputFormat);
+  
+          cache[imageUrl] = dataURL;
+          canvas = null;
+  
+          resolve(dataURL);
+        };
+  
+        img.onerror = reject;
+      });
+    }
 
     return DS.PromiseObject.create({promise: promise});
   }
